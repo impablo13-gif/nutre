@@ -112,6 +112,8 @@ export default function HomeView({ refresh }) {
         </div>
       </div>
 
+      <TodayMeals />
+
       <TipCard />
 
       {shouldPrompt && !showFollowup && (
@@ -133,8 +135,6 @@ export default function HomeView({ refresh }) {
           <button className="btn btn-ghost" style={{ marginTop: 10 }} onClick={() => setShowFollowup(false)}>Cerrar</button>
         </div>
       )}
-
-      <TodayMeals />
     </div>
   )
 }

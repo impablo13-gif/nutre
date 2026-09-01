@@ -7,6 +7,22 @@ import { RecipeDetailSheet } from './RecipeCard'
 
 const TIPOS_ORDEN = ['Desayuno', 'Comida', 'Merienda', 'Cena', 'Snack']
 
+// Miniatura del producto: foto real de Open Food Facts si la hay, si no un
+// icono ilustrado (reutilizando el mismo set de MealIcon) a partir del
+// nombre del ítem de la lista, para que nunca quede un hueco vacío.
+function ShoppingThumb({ image, item, size = 34 }) {
+  const [broken, setBroken] = useState(false)
+  return (
+    <div className="shopping-thumb" style={{ width: size, height: size }}>
+      {image && !broken ? (
+        <img src={image} alt="" onError={() => setBroken(true)} />
+      ) : (
+        <MealIcon ingredientes={[{ nombre: item }]} size={size - 8} />
+      )}
+    </div>
+  )
+}
+
 export default function MealCalendar({ refresh }) {
   const [tab, setTab] = useState('semana')
   const [openMeal, setOpenMeal] = useState(null)
@@ -107,15 +123,30 @@ export default function MealCalendar({ refresh }) {
       {tab === 'compra' && (
         <div>
           {(plan.listaCompra || []).length === 0 && <div className="empty-state">El plan no incluye lista de la compra.</div>}
+          {(plan.listaCompra || []).length > 0 && (() => {
+            const allKeys = (plan.listaCompra || []).flatMap((cat, ci) => (cat.items || []).map((item, ii) => `${ci}:${ii}:${item}`))
+            const done = allKeys.filter((k) => checks[k]).length
+            const pct = allKeys.length ? Math.round((done / allKeys.length) * 100) : 0
+            return (
+              <div className="card" style={{ marginBottom: 12 }}>
+                <div className="row spread" style={{ marginBottom: 8 }}>
+                  <div className="row gap-sm"><ShoppingCart size={15} color="var(--accent-dark)" /><strong style={{ fontSize: 13.5 }}>Progreso de la compra</strong></div>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-dim)', fontWeight: 700 }}>{done}/{allKeys.length}</span>
+                </div>
+                <div className="progress-bar"><div className="progress-bar-fill" style={{ width: `${pct}%`, background: 'var(--accent-2-dark)' }} /></div>
+              </div>
+            )
+          })()}
           {(plan.listaCompra || []).map((cat, ci) => (
             <div key={ci} className="card" style={{ marginBottom: 12 }}>
-              <div className="section-title" style={{ margin: '0 0 8px' }}>{cat.categoria}</div>
+              <div className="section-title" style={{ margin: '0 0 6px' }}>{cat.categoria}</div>
               {(cat.items || []).map((item, ii) => {
                 const key = `${ci}:${ii}:${item}`
                 const checked = !!checks[key]
                 const producto = shoppingProducts[key]
+                const isLast = ii === (cat.items || []).length - 1
                 return (
-                  <div key={key} style={{ padding: '7px 0' }}>
+                  <div key={key} className="shopping-item" style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)' }}>
                     <div className="row gap" style={{ cursor: 'pointer' }} onClick={() => toggleCheck(key)}>
                       <div
                         style={{
@@ -125,9 +156,10 @@ export default function MealCalendar({ refresh }) {
                       >
                         {checked && <Check size={13} color="#fff" />}
                       </div>
-                      <span style={{ fontSize: 14, textDecoration: checked ? 'line-through' : 'none', color: checked ? 'var(--text-dim)' : 'var(--text)' }}>{item}</span>
+                      <ShoppingThumb image={producto?.image} item={item} />
+                      <span style={{ fontSize: 14, flex: 1, textDecoration: checked ? 'line-through' : 'none', color: checked ? 'var(--text-dim)' : 'var(--text)' }}>{item}</span>
                     </div>
-                    <div style={{ paddingLeft: 30, marginTop: 5 }}>
+                    <div style={{ paddingLeft: 30, marginTop: 6 }}>
                       {producto ? (
                         <div
                           className="chip chip-fav"
@@ -215,12 +247,15 @@ function ProductSearchSheet({ item, onPick, onClose }) {
         {results.map((r, i) => (
           <div
             key={i}
-            className="list-item"
-            onClick={() => onPick({ name: r.name, brand: r.brand, store: r.store })}
+            className="list-item row gap"
+            onClick={() => onPick({ name: r.name, brand: r.brand, store: r.store, image: r.image })}
           >
-            <div className="list-item-title">{r.name}</div>
-            <div className="list-item-sub">
-              {[r.brand, r.store].filter(Boolean).join(' · ') || (r.kcal100g != null ? `${r.kcal100g} kcal/100g` : 'sin marca')}
+            <ShoppingThumb image={r.image} item={r.name} size={38} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="list-item-title">{r.name}</div>
+              <div className="list-item-sub">
+                {[r.brand, r.store].filter(Boolean).join(' · ') || (r.kcal100g != null ? `${r.kcal100g} kcal/100g` : 'sin marca')}
+              </div>
             </div>
           </div>
         ))}

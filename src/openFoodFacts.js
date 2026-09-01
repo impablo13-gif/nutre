@@ -1,7 +1,7 @@
 // Búsqueda de alimentos contra la API pública de Open Food Facts (sin API key).
 
 const SEARCH_URL = 'https://world.openfoodfacts.org/cgi/search.pl'
-const FIELDS = 'product_name,brands,stores,nutriments,quantity'
+const FIELDS = 'product_name,brands,stores,nutriments,quantity,image_front_small_url,image_small_url'
 
 // Marcas blancas españolas que en la práctica identifican el supermercado,
 // para cuando el campo "stores" de Open Food Facts viene vacío.
@@ -62,6 +62,7 @@ export async function searchFoods(query) {
           name: p.product_name,
           brand,
           store,
+          image: p.image_front_small_url || p.image_small_url || '',
           quantity: p.quantity || '',
           kcal100g: numOrNull(p.nutriments?.['energy-kcal_100g']),
           proteina100g: numOrNull(p.nutriments?.proteins_100g),

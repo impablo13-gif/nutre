@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Utensils, Calendar, Salad, TrendingUp, Sparkles, Settings, Flame, Leaf } from 'lucide-react'
+import { Utensils, Calendar, Salad, TrendingUp, Sparkles, Settings, Flame, Leaf, ClipboardList } from 'lucide-react'
 import HomeView from './components/HomeView'
 import MealCalendar from './components/MealCalendar'
 import RecipesGallery from './components/RecipesGallery'
@@ -7,10 +7,12 @@ import ProgressView from './components/ProgressView'
 import PlanGenerator from './components/PlanGenerator'
 import SettingsView from './components/SettingsView'
 import ProfileView from './components/ProfileView'
+import FoodDiary from './components/FoodDiary'
 import * as storage from './storage'
 
 const TABS = [
   { key: 'hoy', label: 'Hoy', icon: Utensils },
+  { key: 'diario', label: 'Diario', icon: ClipboardList },
   { key: 'calendario', label: 'Calendario', icon: Calendar },
   { key: 'recetas', label: 'Recetas', icon: Salad },
   { key: 'progreso', label: 'Progreso', icon: TrendingUp },
@@ -38,6 +40,7 @@ export default function App() {
       </div>
       <div className="view-main">
         {tab === 'hoy' && <HomeView refresh={refresh} />}
+        {tab === 'diario' && <FoodDiary refresh={refresh} />}
         {tab === 'calendario' && <MealCalendar refresh={refresh} />}
         {tab === 'recetas' && <RecipesGallery refresh={refresh} />}
         {tab === 'progreso' && <ProgressView refresh={refresh} />}

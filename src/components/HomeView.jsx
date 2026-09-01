@@ -1,12 +1,45 @@
 import { useMemo, useState } from 'react'
-import { ClipboardCheck, Flame, Apple, ChefHat, Sparkles, RefreshCw } from 'lucide-react'
+import { ClipboardCheck, Flame, Apple, ChefHat, Sparkles, RefreshCw, CookingPot } from 'lucide-react'
 import * as storage from '../storage'
 import { dayOfYear } from '../dateUtils'
 import TIPS, { dailyTipIndex, tipAt } from '../tips'
 import FollowupForm from './FollowupForm'
-import FoodDiary from './FoodDiary'
+import RecipeCardWithDetail from './RecipeCard'
 
 const TIP_ICON = { nutricion: Apple, cocina: ChefHat, motivacion: Sparkles }
+const DIA_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+function TodayMeals() {
+  const latest = storage.getLatestWeekPlan()
+  const diaName = DIA_NAMES[new Date().getDay()]
+  const dia = latest?.plan?.dias?.find((d) => d.dia === diaName)
+  const comidas = dia?.comidas || []
+
+  return (
+    <div>
+      <div className="row gap-sm section-title" style={{ marginTop: 0, alignItems: 'center' }}>
+        <CookingPot size={13} /> Hoy toca preparar
+      </div>
+      {!latest ? (
+        <div className="card">
+          <p className="empty-state" style={{ padding: '16px 4px' }}>
+            Todavía no tienes un plan semanal. Ve a "Generar" para crear uno — a partir de ahí verás aquí, cada día, exactamente lo que te toca cocinar.
+          </p>
+        </div>
+      ) : !comidas.length ? (
+        <div className="card">
+          <p className="empty-state" style={{ padding: '16px 4px' }}>
+            Hoy no hay comidas planificadas en casa según tu plan actual.
+          </p>
+        </div>
+      ) : (
+        <div className="col gap">
+          {comidas.map((m, i) => <RecipeCardWithDetail key={i} meal={m} dia={dia.dia} />)}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function greeting() {
   const h = new Date().getHours()
@@ -101,7 +134,7 @@ export default function HomeView({ refresh }) {
         </div>
       )}
 
-      <FoodDiary refresh={refresh} />
+      <TodayMeals />
     </div>
   )
 }

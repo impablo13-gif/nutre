@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, Plus, Star, Trash2, X, Loader2, AlertCircle, PenLine } from 'lucide-react'
+import { Search, Plus, Star, Trash2, X, Loader2, AlertCircle, PenLine, ClipboardList } from 'lucide-react'
 import * as storage from '../storage'
 import { searchFoods, scaleFood } from '../openFoodFacts'
 import { computeTDEE } from '../tdee'
@@ -182,6 +182,11 @@ export default function FoodDiary({ refresh }) {
 
   return (
     <div>
+      <div className="row gap" style={{ marginBottom: 10 }}>
+        <ClipboardList size={18} color="var(--accent-dark)" />
+        <h2 style={{ fontSize: 17, fontWeight: 800 }}>Diario</h2>
+      </div>
+
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="row spread" style={{ marginBottom: 8 }}>
           <div className="section-title" style={{ margin: 0 }}>Hoy</div>

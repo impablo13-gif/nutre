@@ -16,8 +16,8 @@ const DEFAULTS = {
   gustos: '',
   noGustos: '',
   tiempoCocina: 'medio',
-  contextoFutsalActivo: true,
-  contextoFutsalNotas: '',
+  contextoDeportivoActivo: true,
+  contextoDeportivoNotas: '',
 }
 
 export default function ProfileView({ refresh }) {
@@ -138,15 +138,15 @@ export default function ProfileView({ refresh }) {
         </div>
 
         <div className="card" style={{ marginBottom: 14 }}>
-          <div className="row spread" style={{ marginBottom: form.contextoFutsalActivo ? 12 : 0 }}>
-            <label className="field-label" style={{ margin: 0 }}>Contexto fútbol sala</label>
-            <div className={'switch' + (form.contextoFutsalActivo ? ' on' : '')} onClick={() => set({ contextoFutsalActivo: !form.contextoFutsalActivo })} />
+          <div className="row spread" style={{ marginBottom: form.contextoDeportivoActivo ? 12 : 0 }}>
+            <label className="field-label" style={{ margin: 0 }}>Actividad física / deportiva regular</label>
+            <div className={'switch' + (form.contextoDeportivoActivo ? ' on' : '')} onClick={() => set({ contextoDeportivoActivo: !form.contextoDeportivoActivo })} />
           </div>
-          {form.contextoFutsalActivo && (
+          {form.contextoDeportivoActivo && (
             <textarea
-              placeholder="Ej. entreno martes/jueves, partido los sábados por la tarde..."
-              value={form.contextoFutsalNotas}
-              onChange={(e) => set({ contextoFutsalNotas: e.target.value })}
+              placeholder="Ej. entreno martes/jueves, algo más exigente los sábados por la tarde..."
+              value={form.contextoDeportivoNotas}
+              onChange={(e) => set({ contextoDeportivoNotas: e.target.value })}
             />
           )}
         </div>

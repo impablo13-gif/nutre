@@ -9,7 +9,7 @@ export const JSON_SCHEMA_HINT = `Responde ÚNICAMENTE con un objeto JSON válido
     "dias": [
       {
         "dia": "Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo",
-        "contextoEntreno": "string (ej. día de partido, entreno intenso, descanso)",
+        "contextoEntreno": "string (ej. día de esfuerzo/competición, entreno intenso, descanso)",
         "comidas": [
           {
             "tipo": "Desayuno|Comida|Merienda|Cena|Snack",
@@ -31,7 +31,7 @@ const OBJETIVO_LABEL = {
   deficit: 'Déficit / perder grasa',
   superavit: 'Superávit / ganar músculo',
   mantenimiento: 'Mantenimiento',
-  rendimiento: 'Rendimiento en días de partido',
+  rendimiento: 'Rendimiento en días de esfuerzo/competición',
 }
 
 function resumenFollowup(entries) {
@@ -50,11 +50,11 @@ export function buildPrompt({ profile, tdeeResult, recentFollowup, freeNotes }) 
   const t = tdeeResult || {}
   const macros = t.macros || {}
 
-  const contextoFutsal = p.contextoFutsalActivo
-    ? `Sí. Contexto de fútbol sala: ${p.contextoFutsalNotas || 'entrena y juega partidos de fútbol sala; adapta el carbohidrato al día (más en días de partido/entreno intenso, menos en descanso).'}`
+  const contextoDeportivo = p.contextoDeportivoActivo
+    ? `Sí. Contexto deportivo: ${p.contextoDeportivoNotas || 'entrena y compite de forma regular; adapta el carbohidrato al día (más en días de esfuerzo/competición o entreno intenso, menos en descanso).'}`
     : 'No especialmente, alimentación general.'
 
-  return `Eres un nutricionista deportivo experto en fútbol sala. Diseña un plan de comidas semanal (lunes a domingo) para un jugador/entrenador de fútbol sala, realista y de cocina casera española, sin ingredientes exóticos ni fantasiosos.
+  return `Eres un nutricionista deportivo experto. Diseña un plan de comidas semanal (lunes a domingo) para una persona activa, realista y de cocina casera española, sin ingredientes exóticos ni fantasiosos.
 
 Datos del perfil (fijos, no los recalcules, respétalos tal cual):
 - Objetivo: ${OBJETIVO_LABEL[p.objetivo] || p.objetivo || 'mantenimiento'}
@@ -70,7 +70,7 @@ Preferencias:
 - Alimentos que le gustan: ${p.gustos || 'sin preferencias específicas'}
 - Alimentos que NO le gustan: ${p.noGustos || 'ninguno indicado'}
 - Tiempo disponible para cocinar: ${p.tiempoCocina || 'medio'}
-- Contexto de fútbol sala: ${contextoFutsal}
+- Contexto deportivo: ${contextoDeportivo}
 
 Últimas respuestas del cuestionario de seguimiento semanal (úsalas para ajustar el plan si hace falta, p.ej. si la adherencia fue baja simplifica recetas, si el hambre es alta sube saciedad, si la energía es baja revisa el carbohidrato):
 ${resumenFollowup(recentFollowup)}
@@ -80,7 +80,7 @@ ${freeNotes?.trim() || 'sin notas adicionales'}
 
 Instrucciones importantes:
 - Usa el objetivo de kcal y macros diarios ya calculados como referencia fija a respetar cada día (permite un margen razonable, no hace falta que cuadre al gramo).
-- Refleja el contexto de fútbol sala por día en "contextoEntreno" (ej. "día de partido", "entreno intenso", "descanso") y ajusta el carbohidrato de las comidas de ese día en consecuencia (más carbohidrato de fácil digestión en días de partido/entreno intenso).
+- Refleja el contexto deportivo por día en "contextoEntreno" (ej. "día de esfuerzo/competición", "entreno intenso", "descanso") y ajusta el carbohidrato de las comidas de ese día en consecuencia (más carbohidrato de fácil digestión en días de esfuerzo/entreno intenso).
 - Recetas realistas de cocina casera española, ingredientes fáciles de encontrar en cualquier supermercado, sin inventar productos exóticos.
 - Cuando tenga sentido, ten en cuenta productos y marcas típicos de supermercados españoles (p.ej. Mercadona/Hacendado, Lidl, Carrefour, Dia) al sugerir ingredientes, para que sean fáciles de reconocer y comprar tal cual en la lista de la compra.
 - Los kcal/macros de cada comida deben sumar aproximadamente el objetivo diario del día.

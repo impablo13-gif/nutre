@@ -77,12 +77,12 @@ export default function PlanGenerator({ refresh }) {
         <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>1. Contexto real de esta semana</h3>
         <p className="field-hint" style={{ marginBottom: 10 }}>
           Escribe aquí cualquier cosa que el plan deba tener en cuenta ahora mismo: molestias o lesiones,
-          ingredientes que se te han acabado, partidos o torneos, viajes, antojos, lo que sea. Se incluye en el
+          ingredientes que se te han acabado, viajes, eventos, antojos, lo que sea. Se incluye en el
           prompt generado, que además podrás seguir editando a mano abajo.
         </p>
         <textarea
           className="context-textarea"
-          placeholder='Ej: "Esta semana tengo molestia en el isquiotibial", "se me ha acabado el arroz, evita esa receta", "hay un torneo el sábado, necesito carga extra de hidratos el viernes"...'
+          placeholder='Ej: "Esta semana tengo molestia en el isquiotibial", "se me ha acabado el arroz, evita esa receta", "hay un evento el sábado, necesito carga extra de hidratos el viernes"...'
           value={freeNotes}
           onChange={(e) => setFreeNotes(e.target.value)}
         />

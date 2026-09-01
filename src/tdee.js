@@ -15,14 +15,14 @@ export const ACTIVITY_LEVELS = [
   { value: 'ligero', label: 'Ligero (ejercicio 1-3 días/semana)' },
   { value: 'moderado', label: 'Moderado (ejercicio 3-5 días/semana)' },
   { value: 'alto', label: 'Alto (ejercicio intenso 6-7 días/semana)' },
-  { value: 'muy_alto', label: 'Muy alto (entreno + partido, doble sesión)' },
+  { value: 'muy_alto', label: 'Muy alto (dos sesiones de entreno intensas al día)' },
 ]
 
 export const OBJETIVOS = [
   { value: 'deficit', label: 'Déficit / perder grasa' },
   { value: 'superavit', label: 'Superávit / ganar músculo' },
   { value: 'mantenimiento', label: 'Mantenimiento' },
-  { value: 'rendimiento', label: 'Rendimiento en días de partido' },
+  { value: 'rendimiento', label: 'Rendimiento en días de esfuerzo/competición' },
 ]
 
 function round(n) {
@@ -52,7 +52,7 @@ export function computeTDEE({ weightKg, heightCm, age, sex, activityLevel, objet
     nota = 'Superávit moderado (~10%) para ganar músculo sin acumular grasa en exceso.'
   } else if (objetivo === 'rendimiento') {
     targetKcal = tdee * 1.0
-    nota = 'Mantenimiento con más carbohidrato en días de partido/entreno intenso para maximizar el rendimiento.'
+    nota = 'Mantenimiento con más carbohidrato en días de esfuerzo/entreno intenso para maximizar el rendimiento.'
   } else {
     targetKcal = tdee * 1.0
     nota = 'Mantenimiento: cubrir el gasto para sostener el nivel de entrenamiento.'

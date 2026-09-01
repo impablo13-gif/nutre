@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, ChefHat, Flame } from 'lucide-react'
+import { X, ChefHat, Flame, Shuffle } from 'lucide-react'
 import MealIcon from './MealIcon'
 import MacroDonut, { MacroLegend } from './MacroDonut'
 
@@ -64,10 +64,15 @@ export function RecipeDetailSheet({ meal, dia, onClose }) {
 
         {meal.variantes?.length > 0 && (
           <div>
-            <div className="section-title" style={{ margin: '0 0 8px' }}>Variantes</div>
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, lineHeight: 1.8, color: 'var(--text-dim)' }}>
-              {meal.variantes.map((v, i) => <li key={i}>{v}</li>)}
-            </ul>
+            <div className="section-title" style={{ margin: '0 0 8px' }}><Shuffle size={13} style={{ verticalAlign: -2 }} /> Variantes</div>
+            <div className="variantes-list">
+              {meal.variantes.map((v, i) => (
+                <div key={i} className="variante-item">
+                  <span className="variante-dot" />
+                  <span>{v}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

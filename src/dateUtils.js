@@ -13,3 +13,11 @@ export function toLocalIso(date) {
 export function todayIso() {
   return toLocalIso(new Date())
 }
+
+// Día del año (1-366), en horario local, para elegir de forma determinista
+// "el elemento de hoy" de una lista (ej. el tip diario).
+export function dayOfYear(date = new Date()) {
+  const start = new Date(date.getFullYear(), 0, 0)
+  const diffMs = date - start
+  return Math.floor(diffMs / 86400000)
+}

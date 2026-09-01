@@ -151,6 +151,25 @@ label.field-label { display: block; font-size: 12.5px; font-weight: 700; color: 
 
 .followup-banner { background: linear-gradient(135deg, var(--accent-2-soft), var(--carbo-soft)); border: 1px solid var(--accent-2-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; }
 
+.variantes-list { display: flex; flex-direction: column; gap: 7px; }
+.variante-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+.variante-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); flex-shrink: 0; margin-top: 6px; }
+
+.home-hero { background: linear-gradient(135deg, var(--accent-soft), var(--surface) 65%); margin-bottom: 14px; }
+.home-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.home-hero-greeting { font-size: 18px; font-weight: 800; color: var(--text); }
+.home-hero-sub { font-size: 12.5px; color: var(--text-dim); margin-top: 3px; font-weight: 600; }
+.home-hero-streak { display: flex; flex-direction: column; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 14px; flex-shrink: 0; }
+.home-hero-streak .n { font-size: 20px; font-weight: 800; color: var(--accent-2); line-height: 1.1; }
+.home-hero-streak .l { font-size: 9.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .03em; margin-top: 1px; }
+
+.tip-card { background: linear-gradient(135deg, var(--carbo-soft), var(--surface) 70%); border-color: var(--carbo-soft); }
+.tip-card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.tip-card-badge { width: 30px; height: 30px; border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(38,34,32,0.06); }
+.tip-card-label { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
+.tip-card-text { font-size: 14px; line-height: 1.55; color: var(--text); margin-bottom: 10px; }
+.tip-card-more { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--accent-dark); font-size: 12.5px; font-weight: 700; padding: 0; cursor: pointer; }
+
 @media (max-width: 340px) {
   .nav-btn { font-size: 8.5px; }
 }

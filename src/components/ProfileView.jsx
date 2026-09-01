@@ -18,15 +18,33 @@ const DEFAULTS = {
   tiempoCocina: 'medio',
   contextoDeportivoActivo: true,
   contextoDeportivoNotas: '',
+  comidasEnCasa: { desayuno: false, comida: false, merienda: false, cena: true },
+  pisoCompartidoActivo: false,
+  pisoCompartidoNotas: '',
 }
+
+const COMIDAS_EN_CASA_OPCIONES = [
+  { key: 'desayuno', label: 'Desayuno' },
+  { key: 'comida', label: 'Comida' },
+  { key: 'merienda', label: 'Merienda' },
+  { key: 'cena', label: 'Cena' },
+]
 
 export default function ProfileView({ refresh }) {
   const saved = storage.getProfile()
-  const [form, setForm] = useState({ ...DEFAULTS, ...(saved || {}) })
+  const [form, setForm] = useState({
+    ...DEFAULTS,
+    ...(saved || {}),
+    comidasEnCasa: { ...DEFAULTS.comidasEnCasa, ...(saved?.comidasEnCasa || {}) },
+  })
   const [savedFlash, setSavedFlash] = useState(false)
 
   function set(patch) {
     setForm((f) => ({ ...f, ...patch }))
+  }
+
+  function toggleComidaEnCasa(key) {
+    setForm((f) => ({ ...f, comidasEnCasa: { ...f.comidasEnCasa, [key]: !f.comidasEnCasa[key] } }))
   }
 
   const canCompute = form.weightKg && form.heightCm && form.age
@@ -135,6 +153,40 @@ export default function ProfileView({ refresh }) {
               <option value="mucho">Mucho (puedo cocinar con calma)</option>
             </select>
           </div>
+        </div>
+
+        <div className="card" style={{ marginBottom: 14 }}>
+          <label className="field-label">¿En qué comidas cocinas y comes en casa?</label>
+          <p className="field-hint" style={{ marginBottom: 10 }}>
+            Esto es lo que de verdad usamos para simplificar la compra: solo se planifican recetas completas
+            para las comidas que marques aquí. Para el resto (fuera de casa) el plan solo dará una sugerencia
+            ligera, sin receta ni ingredientes en la lista de la compra.
+          </p>
+          <div className="chip-row">
+            {COMIDAS_EN_CASA_OPCIONES.map((o) => (
+              <div
+                key={o.key}
+                className={'chip' + (form.comidasEnCasa[o.key] ? ' selected' : '')}
+                onClick={() => toggleComidaEnCasa(o.key)}
+              >
+                {o.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div className="row spread" style={{ marginBottom: form.pisoCompartidoActivo ? 12 : 0 }}>
+            <label className="field-label" style={{ margin: 0 }}>Piso compartido / cocina y nevera compartidas</label>
+            <div className={'switch' + (form.pisoCompartidoActivo ? ' on' : '')} onClick={() => set({ pisoCompartidoActivo: !form.pisoCompartidoActivo })} />
+          </div>
+          {form.pisoCompartidoActivo && (
+            <textarea
+              placeholder="Ej. poco espacio en la nevera, solo vitro y horno compartidos, prefiero dejar pocos tuppers puestos..."
+              value={form.pisoCompartidoNotas}
+              onChange={(e) => set({ pisoCompartidoNotas: e.target.value })}
+            />
+          )}
         </div>
 
         <div className="card" style={{ marginBottom: 14 }}>

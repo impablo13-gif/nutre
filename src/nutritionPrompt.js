@@ -34,6 +34,18 @@ const OBJETIVO_LABEL = {
   rendimiento: 'Rendimiento en días de esfuerzo/competición',
 }
 
+const MEAL_LABELS = { desayuno: 'Desayuno', comida: 'Comida', merienda: 'Merienda', cena: 'Cena' }
+// Si el perfil guardado es de antes de que existiera este campo, o si el
+// usuario no ha marcado ninguna, asumimos que solo cocina la cena en casa
+// (caso real más habitual: fuera de casa el resto del día).
+const DEFAULT_COMIDAS_EN_CASA = { desayuno: false, comida: false, merienda: false, cena: true }
+
+function comidasEnCasaDe(profile) {
+  const merged = { ...DEFAULT_COMIDAS_EN_CASA, ...(profile?.comidasEnCasa || {}) }
+  if (!Object.values(merged).some(Boolean)) return DEFAULT_COMIDAS_EN_CASA
+  return merged
+}
+
 function resumenFollowup(entries) {
   if (!entries || !entries.length) return 'Todavía no hay respuestas del cuestionario de seguimiento.'
   return entries
@@ -54,6 +66,28 @@ export function buildPrompt({ profile, tdeeResult, recentFollowup, freeNotes }) 
     ? `Sí. Contexto deportivo: ${p.contextoDeportivoNotas || 'entrena y compite de forma regular; adapta el carbohidrato al día (más en días de esfuerzo/competición o entreno intenso, menos en descanso).'}`
     : 'No especialmente, alimentación general.'
 
+  const comidasEnCasa = comidasEnCasaDe(p)
+  const enCasaKeys = Object.keys(MEAL_LABELS).filter((k) => comidasEnCasa[k])
+  const fueraKeys = Object.keys(MEAL_LABELS).filter((k) => !comidasEnCasa[k])
+  const enCasaLabels = enCasaKeys.map((k) => MEAL_LABELS[k])
+  const fueraLabels = fueraKeys.map((k) => MEAL_LABELS[k])
+
+  const comidasEnCasaTexto = fueraLabels.length
+    ? `Solo cocina y come en casa: ${enCasaLabels.join(', ')}. Está fuera de casa en: ${fueraLabels.join(', ')} (no necesita receta completa ni compra para esas comidas).`
+    : `Cocina y come en casa todas sus comidas: ${enCasaLabels.join(', ')}.`
+
+  const pisoCompartido = p.pisoCompartidoActivo
+    ? `Sí, vive en un piso compartido con cocina y/o nevera compartidas.${p.pisoCompartidoNotas ? ` Notas: ${p.pisoCompartidoNotas}` : ''}`
+    : 'No indicado / sin restricciones de cocina compartida.'
+
+  // Motivo concreto de por qué la compra debe ser mínima, para que la
+  // instrucción de simplificación quede justificada y no sea una petición
+  // vaga (el modelo responde mejor a razones concretas que a "simplifica").
+  const motivos = []
+  if (p.pisoCompartidoActivo) motivos.push('vive en un piso compartido' + (p.pisoCompartidoNotas ? ` (${p.pisoCompartidoNotas})` : ''))
+  if (enCasaLabels.length <= 2) motivos.push(`solo cocina de verdad ${enCasaLabels.join(' y ') || 'la cena'} en casa`)
+  const motivoTexto = motivos.length ? motivos.join(' y ') : 'prefiere una compra sencilla y sin complicaciones'
+
   return `Eres un nutricionista deportivo experto. Diseña un plan de comidas semanal (lunes a domingo) para una persona activa, realista y de cocina casera española, sin ingredientes exóticos ni fantasiosos.
 
 Datos del perfil (fijos, no los recalcules, respétalos tal cual):
@@ -71,6 +105,8 @@ Preferencias:
 - Alimentos que NO le gustan: ${p.noGustos || 'ninguno indicado'}
 - Tiempo disponible para cocinar: ${p.tiempoCocina || 'medio'}
 - Contexto deportivo: ${contextoDeportivo}
+- Comidas que realmente cocina y come en casa: ${comidasEnCasaTexto}
+- Vivienda / cocina: ${pisoCompartido}
 
 Últimas respuestas del cuestionario de seguimiento semanal (úsalas para ajustar el plan si hace falta, p.ej. si la adherencia fue baja simplifica recetas, si el hambre es alta sube saciedad, si la energía es baja revisa el carbohidrato):
 ${resumenFollowup(recentFollowup)}
@@ -84,7 +120,11 @@ Instrucciones importantes:
 - Recetas realistas de cocina casera española, ingredientes fáciles de encontrar en cualquier supermercado, sin inventar productos exóticos.
 - Cuando tenga sentido, ten en cuenta productos y marcas típicos de supermercados españoles (p.ej. Mercadona/Hacendado, Lidl, Carrefour, Dia) al sugerir ingredientes, para que sean fáciles de reconocer y comprar tal cual en la lista de la compra.
 - Los kcal/macros de cada comida deben sumar aproximadamente el objetivo diario del día.
-- Incluye una lista de la compra agrupada por categorías (verdura/fruta, proteína, carbohidrato, lácteos, despensa, etc.) que cubra toda la semana.
+- IMPORTANTE — solo planifica comidas reales (con receta, ingredientes y preparación) para las comidas marcadas como "en casa" (${enCasaLabels.join(', ') || 'Cena'}) en cada día de "comidas". Para las comidas marcadas como fuera de casa (${fueraLabels.join(', ') || 'ninguna'}), NO generes una receta completa ni la incluyas en la lista de la compra: o bien omite directamente esa comida del array "comidas" de ese día, o si prefieres dejar constancia, añade solo una sugerencia genérica y ligera en "nombre" (ej. "Fuera de casa — algo ligero: fruta, yogur o un bocadillo sencillo") con "ingredientes": [] y sin "preparacion" detallada.
+- El usuario ${motivoTexto}, así que la compra debe ser MÍNIMA: usa pocos ingredientes distintos en total para toda la semana y REPÍTELOS entre días (ej. una misma proteína base + un mismo carbohidrato base repetidos en varias cenas, cambiando solo la verdura, la especia o la salsa) en lugar de un ingrediente distinto y exótico cada día. Limita a 1-2 proteínas y 1-2 bases de carbohidrato distintas para toda la semana salvo que el usuario pida variedad explícitamente. El objetivo es no desperdiciar comida ni complicar la compra semanal.
+- Cocina mínima: no des por hecho más equipamiento que vitro/sartén, cazuela/olla y horno (cocina de piso compartido, sin robots de cocina, freidora de aire, batidora potente ni utensilios especiales). Preparaciones con pocos pasos (máximo 4-5 pasos por receta).
+- Lista de la compra corta: agrupa cada ingrediente en un único ítem con la cantidad total necesaria para toda la semana (ej. "Pechuga de pollo — 600 g (cena lunes, miércoles y viernes)") en vez de repetirlo varias veces; no añadas productos que solo se usan una vez si se puede evitar comprándolos en su lugar de una versión que ya esté en la lista.
+- Incluye una lista de la compra agrupada por categorías (verdura/fruta, proteína, carbohidrato, lácteos, despensa, etc.) que cubra toda la semana, cubriendo únicamente las comidas marcadas como "en casa".
 
 ${JSON_SCHEMA_HINT}`
 }

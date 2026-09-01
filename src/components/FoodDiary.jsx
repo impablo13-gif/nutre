@@ -313,7 +313,11 @@ export default function FoodDiary({ refresh }) {
       )}
 
       <div className="section-title">Registrado hoy</div>
-      {entries.length === 0 && <div className="empty-state">Todavía no has registrado ninguna comida hoy.</div>}
+      {entries.length === 0 && (
+        <div className="empty-state">
+          Todavía no has registrado ninguna comida hoy.<br />Busca un alimento arriba o toca uno de tus favoritos/recientes para empezar.
+        </div>
+      )}
       {entries.map((e) => (
         <div key={e.id} className="list-item" style={{ cursor: 'default' }}>
           <div className="row spread">

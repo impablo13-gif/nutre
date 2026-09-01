@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ClipboardCheck, Flame, Apple, ChefHat, Sparkles, RefreshCw, CookingPot } from 'lucide-react'
+import { ClipboardCheck, Flame, Apple, ChefHat, Sparkles, RefreshCw, CookingPot, Check, PlusCircle } from 'lucide-react'
 import * as storage from '../storage'
-import { dayOfYear } from '../dateUtils'
+import { dayOfYear, todayIso } from '../dateUtils'
 import TIPS, { dailyTipIndex, tipAt } from '../tips'
 import FollowupForm from './FollowupForm'
 import RecipeCardWithDetail from './RecipeCard'
@@ -9,11 +9,41 @@ import RecipeCardWithDetail from './RecipeCard'
 const TIP_ICON = { nutricion: Apple, cocina: ChefHat, motivacion: Sparkles }
 const DIA_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
-function TodayMeals() {
+// Un plato de hoy se considera "registrado" si ya hay una entrada del diario
+// de hoy con el mismo nombre venida del plan (no de una búsqueda manual
+// distinta) — así evitamos duplicar al pulsar dos veces por error.
+function isMealRegistered(entriesToday, meal) {
+  return entriesToday.some((e) => e.source === 'plan' && e.foodName === meal.nombre)
+}
+
+function registerMeal(meal) {
+  const macros = meal.macros || {}
+  storage.addDiaryEntry({
+    dateIso: todayIso(),
+    foodName: meal.nombre,
+    brand: '',
+    store: '',
+    quantityGrams: null,
+    kcal: Number(meal.kcal) || 0,
+    macros: { proteina: Number(macros.proteina) || 0, carbo: Number(macros.carbo) || 0, grasa: Number(macros.grasa) || 0 },
+    source: 'plan',
+  })
+}
+
+function TodayMeals({ refresh }) {
+  const [tick, setTick] = useState(0)
   const latest = storage.getLatestWeekPlan()
   const diaName = DIA_NAMES[new Date().getDay()]
   const dia = latest?.plan?.dias?.find((d) => d.dia === diaName)
   const comidas = dia?.comidas || []
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const entriesToday = useMemo(() => storage.getDiaryEntriesForDate(todayIso()), [tick])
+
+  function handleRegister(meal) {
+    registerMeal(meal)
+    setTick((t) => t + 1)
+    refresh && refresh()
+  }
 
   return (
     <div>
@@ -34,7 +64,23 @@ function TodayMeals() {
         </div>
       ) : (
         <div className="col gap">
-          {comidas.map((m, i) => <RecipeCardWithDetail key={i} meal={m} dia={dia.dia} />)}
+          {comidas.map((m, i) => {
+            const registrada = isMealRegistered(entriesToday, m)
+            return (
+              <div key={i}>
+                <RecipeCardWithDetail meal={m} dia={dia.dia} />
+                <button
+                  className={'btn btn-sm' + (registrada ? ' btn-outline' : ' btn-accent2')}
+                  style={{ marginTop: 6, width: 'auto' }}
+                  disabled={registrada}
+                  onClick={() => handleRegister(m)}
+                >
+                  {registrada ? <Check size={14} /> : <PlusCircle size={14} />}
+                  {registrada ? 'Registrada en el diario' : 'Registrar'}
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
@@ -112,7 +158,7 @@ export default function HomeView({ refresh }) {
         </div>
       </div>
 
-      <TodayMeals />
+      <TodayMeals refresh={refresh} />
 
       <TipCard />
 
